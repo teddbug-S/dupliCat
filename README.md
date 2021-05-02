@@ -20,7 +20,7 @@ you can choose to delete yourself.
            
            NOTE: We recommend you use the hash table to avoid lose of data or important files.
   
-   - call the `find_junk_files` method to begin the search, search results will be stored in 
+   - call the `find_junk_files` method to begin the 🔍 search, search results will be stored in 
        the `junk_files` property of the class. This method is somewhat the main api of the class, it 
        does everything for you, calling other methods instead of this when you want to conduct a search will
        definitely break something.
@@ -37,8 +37,10 @@ you can choose to delete yourself.
      
 
 # Usage From Commandline
-   - run the class on commandline and pass it `-h` flag, this will definitely see you through!
+   - run the class on 💻 commandline and pass it `-h` flag, this will definitely see you through!
 
 # Contact
    - twitter: teddbug
    - facebook: Tedd Bug
+
+😄 Happy Coding!
