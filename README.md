@@ -40,7 +40,7 @@ you can choose to delete yourself.
    - run the class on 💻 commandline and pass it `-h` flag, this will definitely see you through!
 
 # Contact
-   - twitter: teddbug
+   - twitter  : teddbug
    - facebook: Tedd Bug
 
 😄 Happy Coding!
