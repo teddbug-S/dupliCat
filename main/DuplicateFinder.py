@@ -233,7 +233,7 @@ if __name__ == '__main__':
         finder = DuplicateFinder(path=args.path, recurse=args.recurse, by_hash=args.by_hash)
         finder.find_junk_files()
         analysis = finder.analysis
-        if analysis:
+        if analysis is not None:
             temp = f"""
             Total duplicates found: {analysis.total_count:,}
             Total size on disk: {analysis.total_size:,}
