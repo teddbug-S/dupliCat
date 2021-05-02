@@ -4,6 +4,10 @@ import os
 from sys import exit
 from textwrap import dedent
 from TypeFile import File
+import typing
+from collections import namedtuple
+
+Analysis = namedtuple("Analysis", ["total_count", "total_size", "most_occured_file"])
 
 
 class DuplicateFinder:
@@ -181,16 +185,11 @@ class DuplicateFinder:
             exit('     |_ [-] No files found. You might wanna check your path!')
 
     @property
-    def analysis(self) -> dict:
+    def analysis(self) -> typing.Optional[Analysis]:
         """
         Generates an analysis on the search for duplicates
 
-        Returns a dictionary containing values for each analysis.
-
-        keys:
-            'total_count' :  total number of all duplicates found
-            'total_size' : total size of all junk files on disk.
-            'most_occurred_file' : as name suggests
+        Returns an ``Analysis`` namedtuple.
         """
         if self.junk_files:
             total_file_num = len(self.junk_files)  # total number junk files found
@@ -208,27 +207,23 @@ class DuplicateFinder:
                 total_size = f"{total_file_size_b:.2f} B"
             else:
                 total_size = f"{total_file_size_gb:.2f} GB"
+
             if self.hash_table:
                 most_occurrence = len(max((i for i in self.hash_table.values()), key=lambda x: len(x)))
             else:
                 most_occurrence = len(max((i for i in self.size_table.values()), key=lambda x: len(x)))
             # set each analysis
-            result = {
-                'total_size': total_size,
-                'total_count': total_file_num,
-                'most_occurrence': most_occurrence
-            }
+            result = Analysis(total_size, total_file_num, most_occurrence)
             return result
-        else:
-            return {}
+        # If we've reached this point, return ``None``
+        return None
 
 
 if __name__ == '__main__':
 
     def main():
         parser = argparse.ArgumentParser(description="Searches for duplicate files in a specified path.")
-        parser.add_argument("--path",
-                            '-p', default=os.curdir,
+        parser.add_argument("--path", '-p', default=os.curdir,
                             help="specify path to look for duplicates, defaults to current directory")
         parser.add_argument("--recurse", '-r', action='store_const', const=True,
                             help="set this flag if you want search to be recursive which includes files in sub-dirs")
@@ -240,9 +235,9 @@ if __name__ == '__main__':
         analysis = finder.analysis
         if analysis:
             temp = f"""
-            Total duplicates found: {analysis['total_count']:,}
-            Total size on disk: {analysis['total_size']}
-            Most occurrence: {analysis['most_occurrence']:,}
+            Total duplicates found: {analysis.total_count:,}
+            Total size on disk: {analysis.total_size:,}
+            Most occurrence: {analysis.most_occurrence:,}
             ---------------------------------
             """
             print(dedent(temp))
