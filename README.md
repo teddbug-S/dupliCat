@@ -18,7 +18,7 @@ you can choose to delete yourself.
            and quite fast since table is generated using the size table, parameter defaults to `True`.
            Using the size table is more faster but does not guarrantee accuracy.
            
-           NOTE: We recommend you use the hash table to avoid lose of data or important files.
+    NOTE: We recommend you use the hash table to avoid lose of data or important files.
   
    - call the `find_junk_files` method to begin the 🔍 search, search results will be stored in 
        the `junk_files` property of the class. This method is somewhat the main api of the class, it 
