@@ -6,7 +6,7 @@ it doesn't delete the duplicate files found but returns a list of junk files
 you can choose to delete yourself.
 
 # Usage As A Library:
-   - Import the DuplicateFinder class and create an object by passing the following arguments,
+   - Import the [DuplicateFinder](https://github.com/teddbug-S/DupliCat/blob/main/main/DuplicateFinder.py) class and create an object by passing the following arguments,
        - `path`
            where the search will be made, defaults to current directory.
        - `recurse`
