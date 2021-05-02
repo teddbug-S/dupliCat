@@ -7,12 +7,12 @@ you can choose to delete yourself.
 
 # Usage As A Library:
    - Import the DuplicateFinder class and create an object by passing the following arguments,
-       - path
+       - `path`
            where the search will be made, defaults to current directory.
-       - recurse
+       - `recurse`
            boolean, set to true if you want it to recurse down to all files in the path including sub-dirs
            defaults to `False`
-       - by_hash
+       - `by_hash`
            find duplicates using hash table if set to True otherwise uses size_table, using the 
            hash_table is more accurate in conditions where different files have same sizes
            and quite fast since table is generated using the size table, parameter defaults to `True`.
