@@ -5,7 +5,7 @@ It is intended to be a library but can also be used as a commandline tool,
 it doesn't delete the duplicate files found but returns a list of junk files
 you can choose to delete yourself.
 
-#Usage As A Library:
+# Usage As A Library:
    - Import the DuplicateFinder class and create an object by passing the following arguments,
        - path
            where the search will be made, defaults to current directory.
