@@ -16,7 +16,7 @@ you can choose to delete yourself.
            find duplicates using hash table if set to True otherwise uses size_table, using the 
            hash_table is more accurate in conditions where different files have same sizes
            and quite fast since table is generated using the size table, parameter defaults to `True`.
-           Using the size table is more faster but does not gurrantee accuracy.
+           Using the size table is more faster but does not guarrantee accuracy.
            
            NOTE: We recommend you use the hash table to avoid lose of data or important files.
   
