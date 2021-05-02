@@ -23,7 +23,7 @@ you can choose to delete yourself.
    - call the `find_junk_files` method to begin the search, search results will be stored in 
        the `junk_files` property of the class. This method is somewhat the main api of the class, it 
        does everything for you, calling other methods instead of this when you want to conduct a search will
-       definetely break something.
+       definitely break something.
     
     NOTE: Junk files set by this method contains all duplicates which can safely be deleted without 
     worrying about an original copy for each.
@@ -36,8 +36,8 @@ you can choose to delete yourself.
      property.
      
 
-# Usage from commandline
-   - run the class on commandline and pass it `-h` flag, this will definetely see you through!
+# Usage From Commandline
+   - run the class on commandline and pass it `-h` flag, this will definitely see you through!
 
 # Contact
    - twitter: teddbug
