@@ -4,14 +4,16 @@ from contextlib import redirect_stdout
 from collections import namedtuple
 from hashlib import blake2b
 from io import StringIO
+from functools import wraps
 
 
 def silent(callback):
+    @wraps(callback)
     def wrapper(*args, **kwargs):
         stream = StringIO()
         with redirect_stdout(stream):
-            callback(*args, **kwargs)
-
+            result = callback(*args, **kwargs)
+        return result
     return wrapper
 
 
