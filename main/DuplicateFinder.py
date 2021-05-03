@@ -6,7 +6,7 @@ from textwrap import dedent
 
 from resources.TypeFile import File
 from resources.helpers import Analysis, silent, human_size, hash_chunk
-
+from resources.errors import DuplicateFinderError, PermissionsError
 
 class DuplicateFinder:
     """
@@ -43,7 +43,7 @@ class DuplicateFinder:
         if os.path.exists(path):  # make sure path exists
             self.root = path
         else:
-            exit("[-] Path does not exist.")
+            raise FileNotFoundError("Path does not exist.")
         self.recurse = recurse
         self.by_hash = by_hash
         self.hash_table = {}
@@ -114,9 +114,9 @@ class DuplicateFinder:
             try:
                 file.secure_hash = hash_chunk(file, file.size)
             except PermissionError:
-                print(f"     |_ [-] Access Denied! Can't scan {file}")
+                raise PermissionsError(f"Access denied, cannot scan {file}")
             except TypeError:
-                print(f"     |_ [-] Could generate a secure hash for {file}")
+                raise DuplicateFinderError(f"Cannot generate a secure hash for {file}")
             # setdefault file.secure_hash and file
             index.setdefault(file.secure_hash, []).append(file)
         # filter only hashes containing two or more files
