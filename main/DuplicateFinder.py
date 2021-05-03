@@ -1,30 +1,22 @@
 import argparse
-import hashlib
+import typing
 import os
+
 from sys import exit
 from textwrap import dedent
-from TypeFile import File
-import typing
-from collections import namedtuple
-from functools import cached_property
-
-__all__ = ('DuplicateFinder', 'Analysis')
-
-Analysis = namedtuple("Analysis", ["total_count", "total_size", "most_occured_file"])
+from resources.TypeFile import File
+from resources.helpers import Analysis, silent, human_size, hash_chunk
 
 
 class DuplicateFinder:
     """
     A simple utility for finding duplicated files within a a specified path.
-
     :param path
         Path which search will be done
-
     :param recurse
        When set to True, searches all sub-directories in the path given,
        defaults to False.
        Duplicates can exist with different names in different directories.
-
     :param by_hash
        Find duplicates using hash table if set to True otherwise uses size_table.
        Using the hash_table is more accurate in conditions where different files
@@ -32,24 +24,17 @@ class DuplicateFinder:
        using the size table is more faster and quite better since
        those conditions are rare!
        Oops, they are not rare!!!
-
        NOTE: We recommend you use the hash table to avoid lose of data or important files.
-
     :property:
-
         files:
             A tuple of all file listings of the `path` parameter.
-
         size_table:
             A key-value pair of files grouped together by sizes, can be accessed through `self.size_table`.
-
         hash_table:
             A key-value pair of files and grouped by a secure hash of the
             first 1024 bytes of data read from each file, can be accessed through `self.hash_table`.
-
         junk_files:
             A tuple of files reserved as junk and can all be deleted.
-
         analysis:
             returns analysis on search made
     """
@@ -65,39 +50,6 @@ class DuplicateFinder:
         self.size_table = {}
         self.files = None
         self.junk_files = None
-        
-    @staticmethod
-    def _human_size(nbytes) -> str:
-        """
-        Converts bytes to a human redeable size
-
-            print(_human_size(2024)) # -> 1.98 KB
-        """
-        suffixes = ["B", "KB", "MB", "GB", "TB", "PT"]
-        index = 0
-        while nbytes >= 1024 and index < len(suffixes) - 1:
-            nbytes /= 1024
-            index += 1
-        size = round(nbytes, 2)
-        return f"{size:,} {suffixes[index]}"
-    
-    @staticmethod
-    def read_chunk(file: File, size) -> bytes:
-        """ Reads first [size] chunks from file, size defaults to 400 """
-        file = os.path.join(file.root, file.name)  # get full path of file
-        with open(file, 'rb') as file:
-            # read chunk size
-            chunk = file.read(size)
-        return chunk
-
-    def __hash_chunk(self, file: File, key: int):
-        """ Returns a secure hash of first 1024 bytes from specified file. """
-        chunk = self.read_chunk(file, size=1024)  # read chunk
-        hash_ = hashlib.blake2b(key=bytes(str(key), 'utf-8'))  # a hash object key set to file size
-        # update hash with chunk
-        hash_.update(chunk)
-        # return a secure hash
-        return hash_.hexdigest()
 
     def __fetch_files(self):
         """ Sets `self.files` to a tuple of File objects fetched from `self.root` recursively or non-recursively. """
@@ -140,7 +92,6 @@ class DuplicateFinder:
         """ Builds an index of files grouped by secure hashes of read 1024 bytes.
         :arg
             `from_size`:
-
             If from `from_size` is set to False, hash table will be generated using `self.files`.
             Otherwise, it generates the hash table using `self.size_table` therefore it will internally call
             `self.__generate_size_table` if `self.size_table` is empty.
@@ -161,7 +112,7 @@ class DuplicateFinder:
         for file in files:
             # set secure_hash of file objects
             try:
-                file.secure_hash = self.__hash_chunk(file, file.size)
+                file.secure_hash = hash_chunk(file, file.size)
             except PermissionError:
                 print(f"     |_ [-] Access Denied! Can't scan {file}")
             except TypeError:
@@ -175,13 +126,12 @@ class DuplicateFinder:
 
     def get_junk_files(self):
         """ Returns the junk or files to delete leaving an original copy for each file """
-        return self.junk_files.copy()
+        return self.junk_files
 
-    def find_junk_files(self):
+    def search_duplicate(self):
         """
         Main API of the DuplicateFinder class, calls all necessary methods does to find duplicates
         and sets junk files or files to delete.
-
         Finds duplicates using sizes if `self.by_hash` is set to False, otherwise by hash.
         Access it's result through `self.junk_files`.
         """
@@ -202,17 +152,25 @@ class DuplicateFinder:
         else:
             exit('     |_ [-] No files found. You might wanna check your path!')
 
-    @cached_property
+    @silent
+    def search_silent(self):
+        """
+        A wrapper for the `search_duplicate` method.
+        Use if you don't want anything to be printed out during search.
+        :return:
+        """
+        self.search_duplicate()
+
+    @property
     def analysis(self) -> typing.Optional[Analysis]:
         """
         Generates an analysis on the search for duplicates
-
         Returns an ``Analysis`` namedtuple.
         """
         if self.junk_files:
             total_file_num = len(self.junk_files)  # total number junk files found
             total_file_size_b = sum(file.size for file in self.junk_files)  # total size of junk files
-            total_size = _human_size(total_file_size_b)
+            total_size = human_size(total_file_size_b)
 
             if self.hash_table:
                 most_occurrence = len(max((i for i in self.hash_table.values()), key=lambda x: len(x)))
@@ -237,12 +195,12 @@ if __name__ == '__main__':
                             help="set this flag if you want to use size table otherwise, hash table.")
         args = parser.parse_args()
         finder = DuplicateFinder(path=args.path, recurse=args.recurse, by_hash=args.by_hash)
-        finder.find_junk_files()
+        finder.search_duplicate()
         analysis = finder.analysis
         if analysis is not None:
             temp = f"""
             Total duplicates found: {analysis.total_count:,}
-            Total size on disk: {analysis.total_size}
+            Total size on disk: {analysis.total_size:}
             Most occurrence: {analysis.most_occurrence:,}
             ---------------------------------
             """
