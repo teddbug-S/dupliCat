@@ -79,7 +79,7 @@ class DuplicateFinder:
             nbytes /= 1024
             index += 1
         size = round(nbytes, 2)
-        return f"{size} {suffixes[index]}"
+        return f"{size:,} {suffixes[index]}"
     
     @staticmethod
     def read_chunk(file: File, size) -> bytes:
@@ -219,7 +219,7 @@ class DuplicateFinder:
             else:
                 most_occurrence = len(max((i for i in self.size_table.values()), key=lambda x: len(x)))
             # set each analysis
-            result = Analysis(total_size, total_file_num, most_occurrence)
+            result = Analysis(total_file_num, total_size, most_occurrence)
             return result
         # If we've reached this point, return ``None``
         return None
@@ -241,9 +241,9 @@ if __name__ == '__main__':
         analysis = finder.analysis
         if analysis is not None:
             temp = f"""
-            Total duplicates found: {analysis.total_count:}
+            Total duplicates found: {analysis.total_count:,}
             Total size on disk: {analysis.total_size:}
-            Most occurrence: {analysis.most_occurrence:}
+            Most occurrence: {analysis.most_occurrence:,}
             ---------------------------------
             """
             print(dedent(temp))
