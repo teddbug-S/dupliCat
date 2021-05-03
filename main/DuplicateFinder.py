@@ -242,7 +242,7 @@ if __name__ == '__main__':
         if analysis is not None:
             temp = f"""
             Total duplicates found: {analysis.total_count:,}
-            Total size on disk: {analysis.total_size:}
+            Total size on disk: {analysis.total_size}
             Most occurrence: {analysis.most_occurrence:,}
             ---------------------------------
             """
