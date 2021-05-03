@@ -3,13 +3,14 @@ from .TypeFile import File
 from contextlib import redirect_stdout
 from collections import namedtuple
 from hashlib import blake2b
+from io import StringIO
 
 
 def silent(callback):
     def wrapper(*args, **kwargs):
-        with open(devnull, 'w') as f:
-            with redirect_stdout(f):
-                callback(*args, **kwargs)
+        stream = StringIO()
+        with redirect_stdout(stream):
+            callback(*args, **kwargs)
 
     return wrapper
 
