@@ -18,7 +18,7 @@ def human_size(nbytes_) -> str:
     """
     Converts bytes to a human readable size
 
-        print(_human_size(2024)) # -> 1.98 KB
+        print(human_size(2024)) # -> 1.98 KB
     """
     suffixes = ["B", "KB", "MB", "GB", "TB", "PT"]
     index = 0
