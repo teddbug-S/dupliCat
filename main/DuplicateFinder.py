@@ -12,20 +12,6 @@ __all__ = ('DuplicateFinder', 'Analysis')
 
 Analysis = namedtuple("Analysis", ["total_count", "total_size", "most_occured_file"])
 
-def _human_size(nbytes) -> str:
-    """
-    Converts bytes to a human redeable size
-    
-        print(_human_size(2024)) # -> 1.98 KB
-    """
-    suffixes = ["B", "KB", "MB", "GB", "TB", "PT"]
-    i = 0
-    while nbytes >= 1024 and i < len(suffixes) - 1:
-        nbytes /= 1024
-        i += 1
-    f = round(nbytes, 2)
-    return f"{f} {suffixes[i]}"
-
 
 class DuplicateFinder:
     """
@@ -79,7 +65,22 @@ class DuplicateFinder:
         self.size_table = {}
         self.files = None
         self.junk_files = None
+        
+    @staticmethod
+    def _human_size(nbytes) -> str:
+        """
+        Converts bytes to a human redeable size
 
+            print(_human_size(2024)) # -> 1.98 KB
+        """
+        suffixes = ["B", "KB", "MB", "GB", "TB", "PT"]
+        index = 0
+        while nbytes >= 1024 and index < len(suffixes) - 1:
+            nbytes /= 1024
+            index += 1
+        size = round(nbytes, 2)
+        return f"{size} {suffixes[index]}"
+    
     @staticmethod
     def read_chunk(file: File, size) -> bytes:
         """ Reads first [size] chunks from file, size defaults to 400 """
@@ -240,9 +241,9 @@ if __name__ == '__main__':
         analysis = finder.analysis
         if analysis is not None:
             temp = f"""
-            Total duplicates found: {analysis.total_count:,}
-            Total size on disk: {analysis.total_size:,}
-            Most occurrence: {analysis.most_occurrence:,}
+            Total duplicates found: {analysis.total_count:}
+            Total size on disk: {analysis.total_size:}
+            Most occurrence: {analysis.most_occurrence:}
             ---------------------------------
             """
             print(dedent(temp))
