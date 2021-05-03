@@ -18,3 +18,6 @@ class File:
 
     def __eq__(self, other):
         return self.size == other.size or self.secure_hash == other.secure_hash
+
+    def __ne__(self, other):
+        return self.size != other.size or self.secure_hash != other.secure_hash
