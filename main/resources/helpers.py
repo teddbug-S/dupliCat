@@ -1,4 +1,4 @@
-from os import devnull, path
+from os import path
 from .TypeFile import File
 from contextlib import redirect_stdout
 from collections import namedtuple
