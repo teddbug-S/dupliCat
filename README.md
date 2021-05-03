@@ -20,10 +20,13 @@ you can choose to delete yourself.
            
     NOTE: We recommend you use the hash table to avoid lose of data or important files.
   
-   - call the `find_junk_files` method to begin the 🔍 search, search results will be stored in 
+   - call the `search_duplicate` method to begin the 🔍 search, search results will be stored in 
        the `junk_files` property of the class. This method is somewhat the main api of the class, it 
        does everything for you, calling other methods instead of this when you want to conduct a search will
        definitely break something.
+   
+   - call the `silent_search` method if you want a silent search and nothing printed out.
+       This calls `search_duplicate` behind the scenes and suppresses it's output.
     
     NOTE: Junk files set by this method contains all duplicates which can safely be deleted without 
     worrying about an original copy for each.
