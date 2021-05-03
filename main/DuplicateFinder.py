@@ -174,7 +174,7 @@ class DuplicateFinder:
 
     def get_junk_files(self):
         """ Returns the junk or files to delete leaving an original copy for each file """
-        return self.junk_files
+        return self.junk_files.copy()
 
     def find_junk_files(self):
         """
