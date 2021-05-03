@@ -29,7 +29,7 @@ you can choose to delete yourself.
        This calls `search_duplicate` behind the scenes and suppresses it's output.
     
     NOTE: Junk files set by this method contains all duplicates which can safely be deleted without 
-    worrying about an original copy for each.
+    worrying about an original copy for each. Do not use both methods at same time.
  
    - use the `analysis` property for analysis on the search made, this returns a named tuple containing 
        the total number of duplicate files accessed through `analysis.total_count`, their total size on the disk
