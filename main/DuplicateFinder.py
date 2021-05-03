@@ -6,6 +6,7 @@ from textwrap import dedent
 from TypeFile import File
 import typing
 from collections import namedtuple
+from functools import cached_property
 
 __all__ = ('DuplicateFinder', 'Analysis')
 
@@ -173,7 +174,7 @@ class DuplicateFinder:
 
     def get_junk_files(self):
         """ Returns the junk or files to delete leaving an original copy for each file """
-        return self.junk_files
+        return self.junk_files.copy()
 
     def find_junk_files(self):
         """
@@ -200,7 +201,7 @@ class DuplicateFinder:
         else:
             exit('     |_ [-] No files found. You might wanna check your path!')
 
-    @property
+    @cached_property
     def analysis(self) -> typing.Optional[Analysis]:
         """
         Generates an analysis on the search for duplicates
