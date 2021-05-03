@@ -7,7 +7,23 @@ from TypeFile import File
 import typing
 from collections import namedtuple
 
+__all__ = ('DuplicateFinder', 'Analysis')
+
 Analysis = namedtuple("Analysis", ["total_count", "total_size", "most_occured_file"])
+
+def _human_size(nbytes) -> str:
+    """
+    Converts bytes to a human redeable size
+    
+        print(_human_size(2024)) # -> 1.98 KB
+    """
+    suffixes = ["B", "KB", "MB", "GB", "TB", "PT"]
+    i = 0
+    while nbytes >= 1024 and i < len(suffixes) - 1:
+        nbytes /= 1024
+        i += 1
+    f = round(nbytes, 2)
+    return f"{f} {suffixes[i]}"
 
 
 class DuplicateFinder:
@@ -194,19 +210,7 @@ class DuplicateFinder:
         if self.junk_files:
             total_file_num = len(self.junk_files)  # total number junk files found
             total_file_size_b = sum(file.size for file in self.junk_files)  # total size of junk files
-            # found in bytes
-            total_file_size_kb = total_file_size_b / 1000  # total size in kilobytes
-            total_file_size_mb = total_file_size_kb / 1000  # total size in megabytes
-            total_file_size_gb = total_file_size_mb / 1000  # total size in gigabytes
-            # create the ultimate total size choosing a suitable value and formatting with unit
-            if total_file_size_gb < 1:
-                total_size = f"{total_file_size_mb:.2f} MB"
-            elif total_file_size_mb < 1:
-                total_size = f"{total_file_size_kb:.2f} KB"
-            elif total_file_size_kb < 1:
-                total_size = f"{total_file_size_b:.2f} B"
-            else:
-                total_size = f"{total_file_size_gb:.2f} GB"
+            total_size = _human_size(total_file_size_b)
 
             if self.hash_table:
                 most_occurrence = len(max((i for i in self.hash_table.values()), key=lambda x: len(x)))
