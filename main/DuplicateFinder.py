@@ -146,7 +146,6 @@ class DuplicateFinder:
             `self.__generate_size_table` if `self.size_table` is empty.
         """
         # get files from __size_index in order to save time and speed also enhances accuracy
-        print("  |_ [*] Generating hash table...")
         if self.files:
             if from_size:
                 if not self.size_table:
@@ -158,6 +157,7 @@ class DuplicateFinder:
             return 0
 
         index = {}  # init index
+        print("  |_ [*] Generating hash table...")
         for file in files:
             # set secure_hash of file objects
             try:
