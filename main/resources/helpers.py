@@ -32,7 +32,7 @@ def human_size(nbytes_) -> str:
     return f"{size:,} {suffixes[index]}"
 
 
-def read_chunk(file: File, size) -> bytes:
+def read_chunk(file: File, size: int=400) -> bytes:
     """ Reads first [size] chunks from file, size defaults to 400 """
     file = path.join(file.root, file.name)  # get full path of file
     with open(file, 'rb') as file:
