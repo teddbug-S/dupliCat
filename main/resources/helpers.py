@@ -5,9 +5,10 @@ from collections import namedtuple
 from hashlib import blake2b
 from io import StringIO
 from functools import wraps
+import typing
 
 
-def silent(callback):
+def silent(callback: typing.Callable):
     @wraps(callback)
     def wrapper(*args, **kwargs):
         stream = StringIO()
@@ -17,7 +18,7 @@ def silent(callback):
     return wrapper
 
 
-def human_size(nbytes_) -> str:
+def human_size(nbytes_: int) -> str:
     """
     Converts bytes to a human readable size
 
