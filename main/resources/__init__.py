@@ -1,4 +1,4 @@
 __all__ = [
     'helpers',
-    'TypeFile',
+    'type_file',
 ]
