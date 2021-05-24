@@ -5,7 +5,7 @@ from sys import exit
 from textwrap import dedent
 
 from .resources.type_file import File
-from .resources.helpers import Analysis, silent, human_size, hash_chunk
+from .resources.helpers import Analysis, human_size, hash_chunk
 from .resources.errors import DuplicateFinderError, PermissionsError
 
 class DuplicateFinder:
@@ -44,12 +44,14 @@ class DuplicateFinder:
             self.root = path
         else:
             raise FileNotFoundError("Path does not exist.")
+
         self.recurse = recurse
         self.by_hash = by_hash
         self.hash_table = {}
         self.size_table = {}
         self.files = None
         self.junk_files = None
+
 
     def __fetch_files(self):
         """ Sets `self.files` to a tuple of File objects fetched from `self.root` recursively or non-recursively. """
@@ -76,6 +78,7 @@ class DuplicateFinder:
         # return a tuple of all_files sorted
         self.files = tuple(sorted(all_files, key=lambda x: x.name))
 
+
     def __generate_size_table(self):
         """ Builds an index with files grouped by common sizes. """
         index = {}  # init index
@@ -87,6 +90,7 @@ class DuplicateFinder:
         index = {key: value for key, value in index.items() if len(value) > 1}
         self.size_table = index
         print("     |_ [+] Generated size table successfully.")
+
 
     def __generate_hash_table(self, from_size: bool = True):
         """ Builds an index of files grouped by secure hashes of read 1024 bytes.
@@ -124,9 +128,11 @@ class DuplicateFinder:
         self.hash_table = index
         print("     |_ [+] Generated hash table successfully.")
 
+
     def get_junk_files(self):
         """ Returns the junk or files to delete leaving an original copy for each file """
         return self.junk_files
+
 
     def search_duplicate(self):
         """
@@ -152,7 +158,7 @@ class DuplicateFinder:
         else:
             exit('     |_ [-] No files found. You might wanna check your path!')
 
-    @silent
+
     def search_silent(self):
         """
         A wrapper for the `search_duplicate` method.
@@ -160,6 +166,7 @@ class DuplicateFinder:
         :return:
         """
         self.search_duplicate()
+
 
     @property
     def analysis(self) -> typing.Optional[Analysis]:
