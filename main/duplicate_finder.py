@@ -3,10 +3,13 @@ import typing
 import os
 from sys import exit
 from textwrap import dedent
+import logging
 
 from .resources.type_file import File
 from .resources.helpers import Analysis, human_size, hash_chunk
 from .resources.errors import DuplicateFinderError, PermissionsError
+
+log = logging.getLogger(__name__)
 
 class DuplicateFinder:
     """
@@ -56,7 +59,7 @@ class DuplicateFinder:
     def __fetch_files(self):
         """ Sets `self.files` to a tuple of File objects fetched from `self.root` recursively or non-recursively. """
         all_files = []  # to keep files
-        print('  |_ [*] Fetching files...')
+        log.info('  |_ [*] Fetching files...')
         if self.recurse:
             # use os.walk
             for root, _, files in os.walk(self.root):
@@ -82,14 +85,14 @@ class DuplicateFinder:
     def __generate_size_table(self):
         """ Builds an index with files grouped by common sizes. """
         index = {}  # init index
-        print("  |_ [*] Generating size table...")
+        log.info("  |_ [*] Generating size table...")
         for file in self.files:
             # setdefault file size and file
             index.setdefault(file.size, []).append(file)
         # filter only sizes containing two or more files
         index = {key: value for key, value in index.items() if len(value) > 1}
         self.size_table = index
-        print("     |_ [+] Generated size table successfully.")
+        log.info("     |_ [+] Generated size table successfully.")
 
 
     def __generate_hash_table(self, from_size: bool = True):
@@ -112,7 +115,7 @@ class DuplicateFinder:
             return 0
 
         index = {}  # init index
-        print("  |_ [*] Generating hash table...")
+        log.info("  |_ [*] Generating hash table...")
         for file in files:
             # set secure_hash of file objects
             try:
@@ -126,7 +129,7 @@ class DuplicateFinder:
         # filter only hashes containing two or more files
         index = {key: value for key, value in index.items() if len(value) > 1}
         self.hash_table = index
-        print("     |_ [+] Generated hash table successfully.")
+        log.info("     |_ [+] Generated hash table successfully.")
 
 
     def get_junk_files(self):
@@ -141,10 +144,10 @@ class DuplicateFinder:
         Finds duplicates using sizes if `self.by_hash` is set to False, otherwise by hash.
         Access it's result through `self.junk_files`.
         """
-        print("\n[*] Searching for duplicates...")
+        log.info("\n[*] Searching for duplicates...")
         self.__fetch_files()  # fetch files
         if self.files:
-            print(f"     |_ [+] Fetched successfully {len(self.files):,} files.")
+            log.info(f"     |_ [+] Fetched successfully {len(self.files):,} files.")
             if self.by_hash:
                 # use hash table
                 self.__generate_hash_table()
