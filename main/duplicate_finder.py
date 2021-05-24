@@ -4,9 +4,9 @@ import os
 from sys import exit
 from textwrap import dedent
 
-from resources.TypeFile import File
-from resources.helpers import Analysis, silent, human_size, hash_chunk
-from resources.errors import DuplicateFinderError, PermissionsError
+from .resources.TypeFile import File
+from .resources.helpers import Analysis, silent, human_size, hash_chunk
+from .resources.errors import DuplicateFinderError, PermissionsError
 
 class DuplicateFinder:
     """
