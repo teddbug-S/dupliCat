@@ -1,20 +1,24 @@
-from os import devnull, path
+from os import path
 from .TypeFile import File
 from contextlib import redirect_stdout
 from collections import namedtuple
 from hashlib import blake2b
+from io import StringIO
+from functools import wraps
+import typing
 
 
-def silent(callback):
+def silent(callback: typing.Callable):
+    @wraps(callback)
     def wrapper(*args, **kwargs):
-        with open(devnull, 'w') as f:
-            with redirect_stdout(f):
-                callback(*args, **kwargs)
-
+        stream = StringIO()
+        with redirect_stdout(stream):
+            result = callback(*args, **kwargs)
+        return result
     return wrapper
 
 
-def human_size(nbytes_) -> str:
+def human_size(nbytes_: int) -> str:
     """
     Converts bytes to a human readable size
 
@@ -29,7 +33,7 @@ def human_size(nbytes_) -> str:
     return f"{size:,} {suffixes[index]}"
 
 
-def read_chunk(file: File, size) -> bytes:
+def read_chunk(file: File, size: int=400) -> bytes:
     """ Reads first [size] chunks from file, size defaults to 400 """
     file = path.join(file.root, file.name)  # get full path of file
     with open(file, 'rb') as file:
