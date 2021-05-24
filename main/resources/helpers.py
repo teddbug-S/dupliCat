@@ -1,21 +1,7 @@
 from os import path
-from .TypeFile import File
-from contextlib import redirect_stdout
+from .type_file import File
 from collections import namedtuple
 from hashlib import blake2b
-from io import StringIO
-from functools import wraps
-import typing
-
-
-def silent(callback: typing.Callable):
-    @wraps(callback)
-    def wrapper(*args, **kwargs):
-        stream = StringIO()
-        with redirect_stdout(stream):
-            result = callback(*args, **kwargs)
-        return result
-    return wrapper
 
 
 def human_size(nbytes_: int) -> str:
