@@ -4,7 +4,7 @@ import os
 from textwrap import dedent
 from .duplicate_finder import DuplicateFinder
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO) # Outputs the old print statements into the console
 
 def main():
     parser = argparse.ArgumentParser(description="Searches for duplicate files in a specified path.")
