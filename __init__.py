@@ -1,5 +1,3 @@
-__all__ = [
-    'resources'
-]
+import dupliCat
 
-__package__ = 'duplicat'
+__all__ = ["dupliCat"]
