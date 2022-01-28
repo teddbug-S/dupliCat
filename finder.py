@@ -1,18 +1,17 @@
 import argparse
 import typing
-from sys import exit
-from textwrap import dedent
-from colored import fg, attr
-from dataclasses import dataclass
-from os import walk, PathLike, system, listdir
-from os import path as _path
-from contextlib import redirect_stdout
 from collections import namedtuple
+from contextlib import redirect_stdout
+from dataclasses import dataclass
+from functools import wraps
 from hashlib import blake2b
 from io import StringIO
-from functools import wraps
-
+from os import PathLike, listdir, system, walk, path as _path, curdir
 from pathlib import Path
+from sys import exit
+from textwrap import dedent
+
+from colored import attr, fg
 
 
 @dataclass
