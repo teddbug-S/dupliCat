@@ -28,10 +28,10 @@ it doesn't delete the duplicate files found but returns a list of junk files so 
        - `by_size`
           it defaults to True, this enables the `search_duplicate` method to search using the size index.
        
-    Note: Both parameters are set to True for more accurate search since search will be done using the
+    Note: 
+        Both parameters are set to True for more accurate search since search will be done using the
        `size_index` and also the `hash_index`.
-    
-    NOTE: Junk files set by this method contains all duplicates with one file left over for each.
+        Junk files set by this method contains all duplicates with one file left over for each.
  
    - use the `analyse` method to analyse search result, this returns a named tuple of type `Analysis`.
    It contains 
@@ -59,7 +59,7 @@ it doesn't delete the duplicate files found but returns a list of junk files so 
    Functionality removed for now.
 
 # Contact
-   - twitter  : [teddbug](!https://www.twitter.com/teddbug)
-   - facebook: [Tedd Bug](!https://www.facebook.com/tedd.bug.79/)
+   - twitter: [teddbug](https://www.twitter.com/teddbug)
+   - facebook: [Tedd Bug](https://www.facebook.com/tedd.bug.79/)
 
 😄 Happy Coding!
