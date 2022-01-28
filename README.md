@@ -28,7 +28,7 @@ it doesn't delete the duplicate files found but returns a list of junk files so 
        - `by_size`
           it defaults to True, this enables the `search_duplicate` method to search using the size index.
        
-       Note: Both parameters are set to True for more accurate search since search will be done using the
+    Note: Both parameters are set to True for more accurate search since search will be done using the
        `size_index` and also the `hash_index`.
     
     NOTE: Junk files set by this method contains all duplicates with one file left over for each.
