@@ -245,4 +245,5 @@ class dupliCat:
         return duplicate_files
 
 
-__all__ = ["File", "errors", "dupliCat", "Analysis"]
+__all__ = [
+    "File", "NoFilesFoundError", "SizeIndexEmpty", "DupliCatException", "HashIndexEmpty", "dupliCat", "Analysis"]
