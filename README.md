@@ -5,7 +5,7 @@ It is intended to be a library but can also be used as a commandline tool,
 it doesn't delete the duplicate files found but returns a list of junk files so that you can choose the ones to delete.
 
 # Usage As A Library:
-   - Import the [dupliCat](https://github.com/teddbug-S/dupliCat/blob/main/dupliCat/duplicat.py) class and create an object by passing the following arguments,
+   - Import the [dupliCat](https://github.com/teddbug-S/dupliCat/blob/main/src/dupliCat/__init__.py) class and create an object by passing the following arguments,
        - `path`
            where the search will be made, defaults to current directory.
        - `recurse`
@@ -14,7 +14,7 @@ it doesn't delete the duplicate files found but returns a list of junk files so 
    
    ## Methods
 
-   - the `generate_secure_hash` method takes a file as first argument and generates a secure for it.
+   - the `generate_secure_hash` method takes a file as first argument and generates a secure-hash for it.
      Hashing algorithm is blake2b, key is the size of the file, it returns the file with secure_hash attribute
      set. File must be of type `dupliFile`.
 
@@ -35,13 +35,14 @@ it doesn't delete the duplicate files found but returns a list of junk files so 
        using files from `size_index` as input for generating a hash index.
        
        the `search_duplicate` method has the following optional arguments
-       - `by_hash`
+       - `use_hash`
            find duplicates using hash table if set to True otherwise uses size_table, using the 
            hash_table is more accurate in conditions where different files have same sizes
            and quite fast since table is generated using the size table, parameter defaults to `True`.
            Using the size table is faster but does not guarantee accuracy.
-       - `by_size`
-          it defaults to True, this enables the `search_duplicate` method to search using the size index.
+       - `from_size`
+          it defaults to True, this enables the `search_duplicate` method to generate a hash index
+          using files from the size index. Defaults to `True`.
        
     Note: 
         Both parameters are set to True for more accurate search since search will be done using the
