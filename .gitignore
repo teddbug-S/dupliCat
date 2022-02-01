@@ -1,6 +1,6 @@
 __pycache__/
-demo*.py
-*demo.py
+src/demo.py
+src/demo.py
 LICENSE*
 .idea/
 .vscode/

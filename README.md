@@ -13,6 +13,21 @@ it doesn't delete the duplicate files found but returns a list of junk files so 
            defaults to `False`
    
    ## Methods
+
+   - the `generate_secure_hash` method takes a file as first argument and generates a secure for it.
+     Hashing algorithm is blake2b, key is the size of the file, it returns the file with secure_hash attribute
+     set. File must be of type `dupliFile`.
+
+   - `read_chunk` this method reads a default 400 bytes of data from file. It takes the file as first positional
+      argument and size as second argument which defaults to 400. File must be of type `dupliFile`
+
+   - `human_size` this is a static method that converts bytes into human-readable format.
+   ```doctest
+     >>> human_size(nbytes=123456)
+     >>> 120.56 KB
+   ```
+   - `hash_chunk` static method, takes two positional arguments, `text: str` and `key: int`
+      hashes text with key using blake2b.
   
    - call the `search_duplicate` method to begin the 🔍 search, search results will be stored in 
        the `duplicates` property of the class. This method is somewhat the main api of the class, it 
@@ -24,7 +39,7 @@ it doesn't delete the duplicate files found but returns a list of junk files so 
            find duplicates using hash table if set to True otherwise uses size_table, using the 
            hash_table is more accurate in conditions where different files have same sizes
            and quite fast since table is generated using the size table, parameter defaults to `True`.
-           Using the size table is more faster but does not guarrantee accuracy.
+           Using the size table is faster but does not guarantee accuracy.
        - `by_size`
           it defaults to True, this enables the `search_duplicate` method to search using the size index.
        
