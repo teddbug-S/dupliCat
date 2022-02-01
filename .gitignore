@@ -1,0 +1,10 @@
+__pycache__/
+demo*.py
+*demo.py
+LICENSE*
+.idea/
+.vscode/
+dist/
+src/dupliCat.egg-info/
+src/dupliCat.egg-info/*
+

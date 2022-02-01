@@ -14,12 +14,11 @@
 
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
 # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
 
 import os
 import typing
@@ -27,11 +26,59 @@ from collections import namedtuple
 from hashlib import blake2b
 from itertools import filterfalse
 
-from type_file import File
-from errors import SizeIndexEmpty
+
+class DupliCatException(Exception):
+    """base exception class"""
+
+
+class SizeIndexEmpty(DupliCatException): ...
+
+
+class HashIndexEmpty(DupliCatException): ...
+
+
+class NoFilesFoundError(DupliCatException): ...
+
+
+# The type file
+
+class File:
+    """ A class of keeping all needed info about a file """
+
+    def __init__(self, name: str, root: os.PathLike, size: int, secure_hash: str) -> None:
+        self.name = name  # basename of the file
+        self.root = root  # the root dir of the file
+        self.size = size  # size of the file
+        self.secure_hash = secure_hash  # secure hash generated from first 1024 bytes read
+
+    def delete(self) -> None:
+        """Deletes this file from the system"""
+        os.remove(os.path.join(self.root, self.name))
+
+    def __repr__(self) -> str:
+        """represents `repr(File)`"""
+        return f"File(name={self.name!r}, root={self.root!r}, size={self.size}, secure_hash={self.secure_hash!r})"
+
+    def __str__(self) -> str:
+        """represents `str(File)`"""
+        return f"File(name={self.name!r}, root={self.root!r}, size={self.size}, secure_hash={self.secure_hash!r})"
+
+    def __gt__(self, other):
+        return self.size > other.size or self.name > other.name
+
+    def __lt__(self, other):
+        return self.size < other.size or self.name > other.name
+
+    def __eq__(self, other):
+        return self.size == other.size or self.secure_hash == other.secure_hash
+
+    def __ne__(self, other):
+        return self.size != other.size or self.secure_hash != other.secure_hash
+
 
 # analyses of duplicate search
 Analysis = namedtuple("Analysis", ["total_count", "total_size", "most_occurrence"])
+
 
 class dupliCat:
     """Manages duplicate files"""
@@ -41,12 +88,12 @@ class dupliCat:
         self.path = path
         self.recurse = recurse
         # created
-        self.fetched_files: typing.List[File] = list() # keeps all files fetched from `path`
-        self.size_index = None # keeps size index of files
-        self.hash_index = None # keeps hash index of files
-        self.duplicates: typing.List[File] = list() # keeps all duplicate files
+        self.fetched_files: typing.List[File] = list()  # keeps all files fetched from `path`
+        self.size_index = None  # keeps size index of files
+        self.hash_index = None  # keeps hash index of files
+        self.duplicates: typing.List[File] = list()  # keeps all duplicate files
 
-    # Some helper functions 
+    # Some helper functions
 
     @staticmethod
     def human_size(nbytes_: int) -> str:
@@ -64,7 +111,7 @@ class dupliCat:
         return f"{size:,} {suffixes[index]}"
 
     @staticmethod
-    def read_chunk(file_: File, size: int=400) -> bytes:
+    def read_chunk(file_: File, size: int = 400) -> bytes:
         """Reads first `size` chunks from file, `size` defaults to 400."""
         with open(os.path.join(file_.root, file_.name), 'rb') as f:
             chunk = f.read(size)
@@ -78,7 +125,7 @@ class dupliCat:
         hash_.update(text)
         # return a secure hash
         return hash_.hexdigest()
-    
+
     def analyse(self) -> typing.Optional[Analysis]:
         """returns analysis on search"""
         # do we have duplicates?
@@ -93,16 +140,20 @@ class dupliCat:
                 most_occurrence = len(max((i for i in self.size_index.values()), key=lambda x: len(x)))
             # set analysis parameters and return
             return Analysis(total_file_num, total_size, most_occurrence)
-            
+
         # If we've reached this point, return ``None``
         return None
-    
+
     def generate_secure_hash(self, file_: File) -> File:
-        """generates and sets secure_hash attribute of file with key as the size of `file_` """
+        """
+        generates and sets secure_hash attribute of file with encryption key as the size of `file_`.
+        Returns the file
+        """
         # first read 1024 data chunk from file_
-        chunk = self.read_chunk(file_, size=1024)
+        chunk = str(self.read_chunk(file_, size=1024))
         # generate and set secure hash
         file_.secure_hash = self.hash_chunk(chunk, key=file_.size)
+        return file_
 
     def fetch_files(self) -> typing.Iterable[File]:
         """fetches all files from `self.path`"""
@@ -111,7 +162,7 @@ class dupliCat:
             for root, _, files in os.walk(self.path, topdown=True):
                 # create a file object
                 for file_ in files:
-                    size = os.path.getsize(os.path.join(root, file_)) # get size of file
+                    size = os.path.getsize(os.path.join(root, file_))  # get size of file
                     # append file to `self.fetched_files`
                     self.fetched_files.append(
                         File(name=file_, root=root, size=size, secure_hash="")
@@ -119,39 +170,45 @@ class dupliCat:
         else:
             # fetch all files in `self.path` with `os.listdir`
             for file_ in filterfalse(
-                    # filter out dirs with fiterfalse
+                    # filter out dirs with `fiterfalse`
                     lambda x: not os.path.isfile(os.path.join(self.path, x)),
                     # directory listing with os.listdir
                     os.listdir(self.path)
-                ):
+            ):
                 size = os.path.getsize(os.path.join(self.path, file_))
                 self.fetched_files.append(
                     File(name=file_, root=self.path, size=size, secure_hash="")
                 )
         # return `self.fetched_files`
+        if not self.fetched_files:
+            raise NoFilesFoundError(f"no files found in the directory {self.path!r}, you might wanna check it out.")
         return self.fetched_files
-    
-    def generate_size_index(self) -> typing.Dict:
-        """generates index of files grouped together by sizes"""  
+
+    def generate_size_index(self, files: typing.Iterable = None) -> typing.Dict:
+        """generates index of files grouped together by sizes"""
         index = dict()
-        for file_ in self.fetched_files:
+        files = files if files else self.fetched_files
+        for file_ in files:
             # insert files into index grouped by size
             index.setdefault(file_.size, []).append(file_)
         # filter only sizes containing two or more files
         index = {key: value for key, value in index.items() if len(value) > 1}
         # set to `self.size_index`
         self.size_index = index
-        return index # return index
-    
-    def generate_hash_index(self, from_size: bool = False) -> typing.Dict:
+        return index  # return index
+
+    def generate_hash_index(self, files: typing.Iterable = None, from_size: bool = False) -> typing.Dict:
         """generates index of files grouped together by secure_hashes of the files
         Args:
+            files: files to use in generating the index
             from_size: if set to True, hash index will be generated from `self.size_index`"""
+        # use files else use self.fetched_files
+        files = files if files else self.fetched_files
         if from_size:
             if not self.size_index:
                 raise SizeIndexEmpty(
                     "can't generate hash index from empty size index, did you generate size index?")
-            elif self.size_index: 
+            elif self.size_index:
                 # get files from size index
                 files = [f for items in self.size_index.values() for f in items]
         else:
@@ -163,33 +220,29 @@ class dupliCat:
                 # generate secure hash for each file
                 self.generate_secure_hash(file_)
             except (PermissionError, TypeError):
-                ...# do nothing...
+                ...  # do nothing...
             index.setdefault(file_.secure_hash, []).append(file_)
         # filter only sizes containing two or more files
         index = {key: value for key, value in index.items() if len(value) > 1}
         # set to `self.size_index`
         self.hash_index = index
-        return index # return index
-    
-    def search_duplicate(self, by_hash=True, by_size=True) -> typing.Iterator[File]:
+        return index  # return index
+
+    def search_duplicate(self, use_hash=True, from_size=True) -> typing.Iterator[File]:
         """search for duplicate files either `by_hash` or `by_size` or both."""
         # get files
         files_ = self.fetched_files if self.fetched_files else self.fetch_files()
+        # generate size index
+        size_index = self.generate_size_index()
         # find duplicates by both methods
-        if by_hash and by_size:
-            size_index = self.generate_size_index()
+        if use_hash:
             # enable hash generation from size index
-            hash_index = self.generate_hash_index(from_size=True)
-        # use only hash index
-        elif by_hash:
-            hash_index = self.generate_hash_index()
-        # size index only, low precision as two or more different files may have same sizes
-        else:
-            size_index = self.generate_size_index()
-            # set all duplicated files from size index
-            duplicate_files = [file_ for items in size_index.values() for file_ in items]
+            hash_index = self.generate_hash_index(from_size=from_size)
         # set all duplicated files from size index
-        duplicate_files = [file_ for items in hash_index.values() for file_ in items]
+        duplicate_files = [file_ for items in size_index.values() for file_ in items]
         # set and return
         self.duplicates = duplicate_files
         return duplicate_files
+
+
+__all__ = ["File", "errors", "dupliCat", "Analysis"]
