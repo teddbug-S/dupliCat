@@ -19,6 +19,7 @@ setup(
         "Issues": "https://github.com/teddbug-S/dupliCat/issues",
         "Pull Requests": "https://github.com/teddbug-S/dupliCat/pulls"
     },
+    license="MIT",
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

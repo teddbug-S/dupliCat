@@ -98,7 +98,7 @@ class dupliCat:
     @staticmethod
     def human_size(nbytes_: int) -> str:
         """
-        Converts bytes to a human readable size
+        Converts bytes to a human-readable size
 
             print(human_size(2024)) # -> 1.98 KB
         """
@@ -233,13 +233,15 @@ class dupliCat:
         # get files
         files_ = self.fetched_files if self.fetched_files else self.fetch_files()
         # generate size index
-        size_index = self.generate_size_index()
+        size_index = self.generate_size_index(files=files_)
         # find duplicates by both methods
         if use_hash:
             # enable hash generation from size index
-            hash_index = self.generate_hash_index(from_size=from_size)
-        # set all duplicated files from size index
-        duplicate_files = [file_ for items in size_index.values() for file_ in items]
+            hash_index = self.generate_hash_index(files=files_, from_size=from_size)
+            # set all duplicated files from hash index
+            duplicate_files = [file_ for items in hash_index.values() for file_ in items]
+        else:
+            duplicate_files = [file_ for items in size_index.values() for file_ in items]
         # set and return
         self.duplicates = duplicate_files
         return duplicate_files
