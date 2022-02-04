@@ -7,3 +7,4 @@ LICENSE*
 dist/
 src/dupliCat.egg-info/
 src/dupliCat.egg-info/*
+.venv/
