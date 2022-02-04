@@ -61,6 +61,7 @@ class dupliFile:
     def __init__(self, name: str, root: os.PathLike, size: int, secure_hash: str) -> None:
         self.name = name  # basename of the file
         self.root = root  # the root dir of the file
+        self.path = os.path.join(root, name)  # the full path of the file
         self.size = size  # size of the file
         self.secure_hash = secure_hash  # secure hash generated from first 1024 bytes read
 
