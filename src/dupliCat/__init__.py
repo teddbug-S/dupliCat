@@ -25,6 +25,7 @@ import typing
 from collections import namedtuple
 from hashlib import blake2b
 from itertools import filterfalse
+from functools import wraps
 
 
 class DupliCatException(Exception):
@@ -39,6 +40,18 @@ class HashIndexEmpty(DupliCatException): ...
 
 class NoFilesFoundError(DupliCatException): ...
 
+
+def _check_instance(fn):
+    # Simple decorator for the comparison operators,
+    # checks if ``self`` and ``other`` are the same object.
+    @wraps(fn)
+    def wrapper(self, other):
+        if isinstance(other, type(self)):
+            return fn(self, other)
+        raise TypeError(
+            f"Can't compare {type(self).__name__!r} with {type(other).__name__!r}"
+        )
+    return wrapper
 
 # The type file
 
@@ -63,15 +76,19 @@ class dupliFile:
         """represents `str(dupliFile)`"""
         return f"dupliFile(name={self.name!r}, root={self.root!r}, size={self.size}, secure_hash={self.secure_hash!r})"
 
+    @_check_instance
     def __gt__(self, other):
         return self.size > other.size or self.name > other.name
 
+    @_check_instance
     def __lt__(self, other):
         return self.size < other.size or self.name > other.name
 
+    @_check_instance
     def __eq__(self, other):
         return self.size == other.size or self.secure_hash == other.secure_hash
 
+    @_check_instance
     def __ne__(self, other):
         return self.size != other.size or self.secure_hash != other.secure_hash
 
@@ -247,4 +264,5 @@ class dupliCat:
 
 
 __all__ = [
-    "dupliFile", "NoFilesFoundError", "SizeIndexEmpty", "DupliCatException", "HashIndexEmpty", "dupliCat", "Analysis"]
+    "dupliFile", "NoFilesFoundError", "SizeIndexEmpty", "DupliCatException", "HashIndexEmpty", "dupliCat", "Analysis"
+]
