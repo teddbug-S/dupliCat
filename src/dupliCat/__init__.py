@@ -240,7 +240,7 @@ class dupliCat:
                 ...  # do nothing...
             index.setdefault(file_.secure_hash, []).append(file_)
         # filter only sizes containing two or more files
-        index = {key: value for key, value in index.items() if len(value) > 1}
+        index = {key: value for key, value in index.items() if len(value) >= 1}
         # set to `self.size_index`
         self.hash_index = index
 
