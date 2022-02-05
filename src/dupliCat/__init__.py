@@ -69,15 +69,13 @@ class dupliFile:
 
     def delete(self) -> None:
         """Deletes this file from the system"""
-        os.remove(os.path.join(self.root, self.name))
+        os.remove(self.path)
 
     def __repr__(self) -> str:
         """represents `repr(dupliFile)`"""
         return f"dupliFile(name={self.name!r}, root={self.root!r}, size={self.size}, secure_hash={self.secure_hash!r})"
 
-    def __str__(self) -> str:
-        """represents `str(dupliFile)`"""
-        return f"dupliFile(name={self.name!r}, root={self.root!r}, size={self.size}, secure_hash={self.secure_hash!r})"
+    __str__ = __repr__
 
     @_check_instance
     def __gt__(self, other: dupliFile) -> bool:
@@ -240,7 +238,7 @@ class dupliCat:
                 # generate secure hash for each file
                 self.generate_secure_hash(file_)
             except (PermissionError, TypeError):
-                ...  # do nothing...
+                pass  # do nothing...
             index.setdefault(file_.secure_hash, []).append(file_)
         # filter only sizes containing two or more files
         index = {key: value for key, value in index.items() if len(value) > 1}
@@ -266,6 +264,6 @@ class dupliCat:
         return duplicate_files.copy()
 
 
-__all__ = [
+__all__ = (
     "dupliFile", "NoFilesFoundError", "SizeIndexEmpty", "DupliCatException", "HashIndexEmpty", "dupliCat", "Analysis"
-]
+)
