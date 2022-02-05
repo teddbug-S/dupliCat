@@ -43,6 +43,9 @@ class HashIndexEmpty(DupliCatException): ...
 class NoFilesFoundError(DupliCatException): ...
 
 
+class NoDuplicatesFound(DupliCatException): ...
+
+
 def _check_instance(fn: Callable[[Any, Any], bool]) -> Callable[[Any, Any], bool]:
     # Simple decorator for the comparison operators,
     # checks if ``self`` and ``other`` are the same object.
@@ -223,8 +226,7 @@ class dupliCat:
         files_ = files if files else self.fetched_files
         if from_size:
             if not self.size_index:
-                raise SizeIndexEmpty(
-                    "can't generate hash index from empty size index, did you generate size index?")
+                raise NoDuplicatesFound("No duplicate files found.")
             elif self.size_index:
                 # get files from size index
                 files_ = [f for items in self.size_index.values() for f in items]
