@@ -202,7 +202,7 @@ class dupliCat:
         # return `self.fetched_files`
         if not self.fetched_files:
             raise NoFilesFoundError(f"no files found in the directory {self.path!r}, you might wanna check it out.")
-        return self.fetched_files
+        return self.fetched_files.copy()
 
     def generate_size_index(self, files: Iterable = None) -> None:
         """generates index of files grouped together by sizes"""
@@ -263,7 +263,7 @@ class dupliCat:
             duplicate_files = [file_ for items in self.size_index.values() for file_ in items]
         # set and return
         self.duplicates = duplicate_files
-        return duplicate_files
+        return duplicate_files.copy()
 
 
 __all__ = [
