@@ -100,10 +100,10 @@ You can now use dupliCat from the command line.
 
 - twitter: [teddbug](https://www.twitter.com/teddbug)
 - facebook: [Tedd Bug](https://www.facebook.com/tedd.bug.79/)
-- mail: [etornam47@protonmail.com]
+- mail: etornam47@protonmail.com
 
 ### Kwieeciol
 
-- mail: [lukkwie456@gmail.com]
+- mail: lukkwie456@gmail.com
 - facebook: [Kwieeciol](https://www.facebook.com/profile.php?id=100043452014581)
 😄 Happy Coding!
