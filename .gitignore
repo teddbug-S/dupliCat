@@ -10,3 +10,4 @@ src/dupliCat.egg-info/*
 .venv/
 .mypy_cache/
 files/
+*demo.py

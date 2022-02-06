@@ -33,13 +33,6 @@ from functools import wraps
 class DupliCatException(Exception):
     """base exception class"""
 
-
-class SizeIndexEmpty(DupliCatException): ...
-
-
-class HashIndexEmpty(DupliCatException): ...
-
-
 class NoFilesFoundError(DupliCatException): ...
 
 
@@ -173,7 +166,8 @@ class dupliCat:
         # first read 1024 data chunk from file_
         chunk = self.read_chunk(file_, size=1024)
         # generate and set secure hash
-        file_.secure_hash = self.hash_chunk(chunk.decode("utf-8"), key=file_.size)
+        # hash index doesn't get generated when chunk is turned into str
+        file_.secure_hash = self.hash_chunk(chunk, key=file_.size)
         return file_
 
     def fetch_files(self) -> Iterable[dupliFile]:
@@ -217,19 +211,12 @@ class dupliCat:
         # set to `self.size_index`
         self.size_index = index
 
-    def generate_hash_index(self, files: Iterable = None, from_size: bool = False) -> None:
+    def generate_hash_index(self, files: Iterable = None) -> None:
         """generates index of files grouped together by secure_hashes of the files
         Args:
-            files: files to use in generating the index
-            from_size: if set to True, hash index will be generated from `self.size_index`"""
+            files: files to use in generating the index"""
         # use files else use self.fetched_files
         files_ = files if files else self.fetched_files
-        if from_size:
-            if not self.size_index:
-                raise NoDuplicatesFound("No duplicate files found.")
-            elif self.size_index:
-                # get files from size index
-                files_ = [f for items in self.size_index.values() for f in items]
         if not files_:
             raise NoFilesFoundError("no files found, did you forget to fetch files?")
         # initialize index
@@ -255,17 +242,22 @@ class dupliCat:
         self.generate_size_index(files=files_)
         # find duplicates by both methods
         if use_hash:
+            if from_size and not self.size_index: # from_size should be controlles by `search_duplicate`
+                # not `generate_hash_index`
+                raise NoDuplicatesFound("No duplicates found!")
+            # else use files from size index
+            files_ = [file_ for items in self.size_index.values() for file_ in items]
             # enable hash generation from size index
-            self.generate_hash_index(files=files_, from_size=from_size)
+            self.generate_hash_index(files=files_)
             # set all duplicated files from hash index
             duplicate_files = [file_ for items in self.hash_index.values() for file_ in items]
         else:
             duplicate_files = [file_ for items in self.size_index.values() for file_ in items]
-        # set and return
+        # set and return a copy
         self.duplicates = duplicate_files
         return duplicate_files.copy()
 
 
 __all__ = (
-    "dupliFile", "NoFilesFoundError", "SizeIndexEmpty", "DupliCatException", "HashIndexEmpty", "dupliCat", "Analysis"
+    "dupliFile", "NoFilesFoundError", "DupliCatException", "NoDuplicatesFound", "dupliCat", "Analysis"
 )

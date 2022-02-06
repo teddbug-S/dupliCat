@@ -30,4 +30,10 @@ setup(
     package_dir={"": "src"},
     packages=find_packages("src"),
     python_requires=">=3.6",
+    requires=["click"],
+    entry_points={
+        'console_scripts': [
+            'dupliCat = dupliCat.__main__:main',
+        ]
+    }
 )
