@@ -76,10 +76,18 @@ class dupliFile:
     @_check_instance
     def __gt__(self, other: dupliFile) -> bool:
         return self.size > other.size or self.name > other.name
+    
+    @_check_instance
+    def __ge__(self, other: dupliFile) -> bool:
+        return self.size >= other.size or self.name >= other.name
 
     @_check_instance
     def __lt__(self, other: dupliFile) -> bool:
-        return self.size < other.size or self.name > other.name
+        return self.size < other.size or self.name < other.name
+
+    @_check_instance
+    def __le__(self, other: dupliFile) -> bool:
+        return self.size <= other.size or self.name <= other.name
 
     @_check_instance
     def __eq__(self, other: dupliFile) -> bool:
