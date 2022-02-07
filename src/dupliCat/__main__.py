@@ -54,7 +54,7 @@ def search_duplicates(
         click.echo(click.style(f"{path!r} directory is empty.", bold=True))
         return None
 
-    grouped_duplicates = defaultdict(list)
+    grouped_duplicates = defaultdict(list)  # {SECURE_HASH: [DUPLIFILE, DUPLIFILE, ...]}
     for duplicate in duplicates:
         grouped_duplicates[duplicate.secure_hash].append(duplicate)
 
@@ -65,6 +65,7 @@ def search_duplicates(
         )
     )
 
+    # Print duplicated files
     for i, files in enumerate(grouped_duplicates.values(), start=1):
         q = click.style(
             f"{i}. Size: {files[0].human_size}:\t{', '.join([repr(f.path) for f in files])}",
@@ -74,6 +75,7 @@ def search_duplicates(
         click.echo(q)
 
     if delete and length > 0:
+        # asking for confirmation on whether to delete files
         confirmation = click.confirm(
             click.style(
                 "\nDo you want to delete duplicates? (This action is irreversible)",
@@ -83,6 +85,7 @@ def search_duplicates(
         if not confirmation:
             return None
 
+        # ask if we should keep a copy of a duplicate file or not
         keep_copy = click.confirm(
             click.style("Do you want to keep a copy of the original file?", bold=True)
         )
