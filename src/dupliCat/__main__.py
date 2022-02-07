@@ -48,8 +48,8 @@ def search_duplicates(
             use_hash=not dont_use_hash, from_size=not dont_use_size
         )
     except dupliCat.NoDuplicatesFound:
-        click.echo(click.style(f"No duplicates found.", fg="green", bold=True))
-        return
+        click.echo(click.style("No duplicates found.", fg="green", bold=True))
+        return None
 
     grouped_duplicates = defaultdict(list)
     for duplicate in duplicates:
