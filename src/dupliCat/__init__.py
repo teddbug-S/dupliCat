@@ -27,7 +27,7 @@ from typing import List, Dict, Union, Optional, Iterable, Callable, Any
 from collections import namedtuple
 from hashlib import blake2b
 from itertools import filterfalse
-from functools import wraps
+from functools import wraps, cached_property
 
 
 class DupliCatException(Exception):
@@ -88,6 +88,10 @@ class dupliFile:
     @_check_instance
     def __ne__(self, other: dupliFile) -> bool:
         return self.size != other.size or self.secure_hash != other.secure_hash
+    
+    @cached_property
+    def human_size(self) -> str:
+        return dupliCat.human_size(self.size)
 
 
 # analyses of duplicate search
@@ -167,7 +171,7 @@ class dupliCat:
         chunk = self.read_chunk(file_, size=1024)
         # generate and set secure hash
         # hash index doesn't get generated when chunk is turned into str
-        file_.secure_hash = self.hash_chunk(chunk, key=file_.size)
+        file_.secure_hash = self.hash_chunk(chunk, key=file_.size)  # type: ignore
         return file_
 
     def fetch_files(self) -> Iterable[dupliFile]:
