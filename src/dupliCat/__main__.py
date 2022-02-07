@@ -50,6 +50,9 @@ def search_duplicates(
     except dupliCat.NoDuplicatesFound:
         click.echo(click.style("No duplicates found.", fg="green", bold=True))
         return None
+    except dupliCat.NoFilesFoundError:
+        click.echo(click.style(f"{path!r} directory is empty.", bold=True))
+        return None
 
     grouped_duplicates = defaultdict(list)
     for duplicate in duplicates:
@@ -102,7 +105,7 @@ def search_duplicates(
             else:
                 counter += 1
 
-        color = "green" if counter == length else "yellow" if counter > 0 else "red"
+        color = "green" if counter == len(files) else "yellow" if counter > 0 else "red"
         click.echo(
             click.style(
                 f"\nDeleted {counter} {'file' if counter == 1 else 'files'} out of {len(files)}",

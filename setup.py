@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as readme:
 
 setup(
     name="dupliCat",
-    version="2.2.5",
+    version="2.3.0",
     author="Divine Darkey (teddbug-S)",
     author_email="teddbug47@gmail.com",
     maintainer="Divine Darkey (teddbug-S)",
