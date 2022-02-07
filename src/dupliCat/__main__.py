@@ -27,26 +27,87 @@ from collections import defaultdict
 
 
 @click.group()
-@click.option("--path", default=os.getcwd(), help="Path to the directory to be scanned")
-@click.option("--no-recurse", is_flag=True, help="Do not recurse into subdirectories")
-def main(path, no_recurse):
-    main.duplicat = dupliCat.dupliCat(path=path, recurse=not no_recurse)
-    click.echo(f"Scanning {path!r}...\n")
+def main() -> bool:
+    pass
 
 
 @main.command(name="search-duplicates")
+@click.option("--no-recurse", is_flag=True, help="Do not recurse into subdirectories")
+@click.option("--path", default=os.getcwd(), help="Path to the directory to be scanned")
 @click.option("--dont-use-hash", is_flag=True, help="Do not use hash to compare files")
 @click.option("--dont-use-size", is_flag=True, help="Do not use size to compare files")
-def search_duplicates(dont_use_hash, dont_use_size):
-    duplicates = main.duplicat.search_duplicate(
-        use_hash=not dont_use_hash, from_size=not dont_use_size
-    )
+@click.option("--delete", is_flag=True, help="Delete duplicate files.")
+def search_duplicates(
+    path: str, no_recurse: bool, dont_use_hash: bool, dont_use_size: bool, delete: bool
+) -> None:
+    click.echo(click.style(f"Scanning {path!r}...\n", fg="green", bold=True))
+
+    duplicat = dupliCat.dupliCat(path=path, recurse=not no_recurse)
+    try:
+        duplicates = duplicat.search_duplicate(
+            use_hash=not dont_use_hash, from_size=not dont_use_size
+        )
+    except dupliCat.NoDuplicatesFound:
+        click.echo(click.style(f"No duplicates found.", fg="green", bold=True))
+        return
+
     grouped_duplicates = defaultdict(list)
     for duplicate in duplicates:
         grouped_duplicates[duplicate.secure_hash].append(duplicate)
 
+    length = len(grouped_duplicates)
+    click.echo(
+        click.style(
+            f"Found {length} {'duplicate' if length == 1 else 'duplicates'}", bold=True
+        )
+    )
+
     for i, files in enumerate(grouped_duplicates.values(), start=1):
-        click.echo(f"{i}. {', '.join([f'{f.path!r}' for f in files])}")
+        q = click.style(
+            f"{i}. Size: {files[0].human_size}:\t{', '.join([repr(f.path) for f in files])}",
+            fg="yellow",
+            bold=True,
+        )
+        click.echo(q)
+
+    if delete and length > 0:
+        confirmation = click.confirm(
+            click.style(
+                "\nDo you want to delete duplicates? (This action is irreversible)",
+                bold=True,
+            )
+        )
+        if not confirmation:
+            return None
+
+        keep_copy = click.confirm(
+            click.style("Do you want to keep a copy of the original file?", bold=True)
+        )
+
+        if keep_copy:  # remove first file and keep the rest to be deleted
+            files = [fs[1:] for fs in grouped_duplicates.values()]
+        else:
+            files = list(grouped_duplicates.values())
+
+        # flattening the list
+        files = [f for fs in files for f in fs]
+
+        # deleting files
+        counter = 0
+        for f in files:
+            try:
+                f.delete()
+            except Exception:
+                continue
+            else:
+                counter += 1
+
+        click.echo(
+            click.style(
+                f"\nDeleted {counter} {'file' if counter == 1 else 'files'} out of {len(files)}",
+                bold=True,
+            )
+        )
 
 
 if __name__ == "__main__":
