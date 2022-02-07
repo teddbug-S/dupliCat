@@ -102,10 +102,11 @@ def search_duplicates(
             else:
                 counter += 1
 
+        color = "green" if counter == length else "yellow"
         click.echo(
             click.style(
                 f"\nDeleted {counter} {'file' if counter == 1 else 'files'} out of {len(files)}",
-                bold=True,
+                bold=True, fg=color
             )
         )
 
