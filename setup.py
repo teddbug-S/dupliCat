@@ -5,12 +5,12 @@ with open("README.md", "r", encoding="utf-8") as readme:
 
 setup(
     name="dupliCat",
-    version="2.3.2",
+    version="3.0.5",
     author="Divine Darkey (teddbug-S)",
     author_email="teddbug47@gmail.com",
     maintainer="Divine Darkey (teddbug-S)",
     maintainer_email="teddbug47@gmail.com",
-    description="A simple package to hunt down file duplicates",
+    description="A simple package to hunt down file duplicates.",
     long_description=long_description,
     description_content_type="text",
     long_description_content_type="text/markdown",

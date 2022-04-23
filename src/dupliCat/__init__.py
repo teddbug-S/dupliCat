@@ -23,11 +23,12 @@
 from __future__ import annotations
 
 import os
-from typing import List, Dict, Union, Optional, Iterable, Callable, Any
+from typing import List, Dict, Union, Optional, Iterable, Callable, Any, AnyStr, Generator
 from collections import namedtuple
 from hashlib import blake2b
 from itertools import filterfalse
 from functools import wraps, cached_property
+from concurrent.futures import ThreadPoolExecutor
 
 
 class DupliCatException(Exception):
@@ -63,7 +64,7 @@ class dupliFile:
     """A class of keeping all needed info about a file"""
 
     def __init__(
-        self, name: str, root: os.PathLike, size: int, secure_hash: str
+            self, name: str, root: os.PathLike, size: int, secure_hash: str
     ) -> None:
         self.name: str = name  # basename of the file
         self.root: os.PathLike = root  # the root dir of the file
@@ -130,6 +131,7 @@ class dupliCat:
         self.size_index: Dict[int, List[dupliFile]] = {}  # keeps size index of files
         self.hash_index: Dict[str, List[dupliFile]] = {}  # keeps hash index of files
         self.duplicates: List[dupliFile] = list()  # keeps all duplicate files
+        self.junk_files: List[dupliFile] = list()  # keeps junk files from the duplicates excluding original copies
 
     # Some helper functions
 
@@ -148,12 +150,27 @@ class dupliCat:
         size = round(nbytes, 2)
         return f"{size:,} {suffixes[index]}"
 
+    def scantree(self, path: AnyStr | os.PathLike[AnyStr]) -> Generator[AnyStr]:
+        """scans a directory tree recursively yielding each every file in its full path"""
+        try:
+            for new_path in filterfalse(lambda x: x.name.startswith('.'), os.scandir(path)):
+                if new_path.is_file():  # base case
+                    yield new_path.path
+                else:
+                    yield from self.scantree(new_path.path)  # do some recursion
+        except FileNotFoundError:
+            ...
+
     @staticmethod
     def read_chunk(file_: dupliFile, size: int = 400) -> bytes:
         """Reads first `size` chunks from file, `size` defaults to 400."""
-        with open(os.path.join(file_.root, file_.name), "rb") as f:
-            chunk = f.read(size)
-        return chunk
+        try:
+            with open(os.path.join(file_.root, file_.name), "rb") as f:
+                chunk = f.read(size)
+        except FileNotFoundError:
+            ...  # just skip this file
+        else:
+            return chunk
 
     @staticmethod
     def hash_chunk(text: str, key: int) -> str:
@@ -172,7 +189,7 @@ class dupliCat:
         if self.duplicates:
             total_file_num = len(self.duplicates)  # total number duplicate files
             # total size of duplicate files
-            total_size = self.human_size(sum(file_.size for file_ in self.duplicates))
+            total_size = self.human_size(sum(file_.size for file_ in self.junk_files))
             # do we have a hash index or was the search by a hash index?
             if self.hash_index:
                 most_occurrence = len(
@@ -188,53 +205,56 @@ class dupliCat:
         # If we've reached this point, return ``None``
         return None
 
-    def generate_secure_hash(self, file_: dupliFile) -> dupliFile:
+    def set_secure_hash(self, file_: dupliFile, secure_hash: Optional[str] = None):
+        """set the secure hash attribute of the file"""
+        if not secure_hash:
+            secure_hash = self.generate_secure_hash(file_)
+        file_.secure_hash = secure_hash  # that's all.
+
+    def generate_secure_hash(self, file_: dupliFile) -> str:
         """
-        generates and sets secure_hash attribute of file with encryption key as the size of `file_`.
-        Returns the file
+        generates a secure hash of file with encryption key as the size of `file_`.
+        Returns the secure hash
         """
-        # first read 1024 data chunk from file_
+        # first read 1024 bytes data chunk from file
         chunk = self.read_chunk(file_, size=1024)
         # generate and set secure hash
-        # hash index doesn't get generated when chunk is turned into str
-        file_.secure_hash = self.hash_chunk(chunk, key=file_.size)  # type: ignore
-        return file_
+        #  index doesn't get generated when chunk is turned into str
+        secure_hash = self.hash_chunk(chunk, key=file_.size)  # type: ignore
+        return secure_hash
 
     def fetch_files(self) -> Iterable[dupliFile]:
-        """fetches all files from `self.path`"""
+        """
+        fetches all files from `self.path` using `self.scantree`
+        this new development will speed up the process of finding duplicates since
+        fetching files is one expensive operation to perform on big directories using `os.walk`
+        `os.scandir` is significantly faster than `os.walk`
+        """
         # use os.walk to recursively fetch files
         if self.recurse:
-            for root, _, files in os.walk(self.path, topdown=True):
-                # create a file object
-                for file_ in files:
-                    try:
-                        size = os.path.getsize(
-                            os.path.join(root, file_)
-                        )  # get size of file
-                    except FileNotFoundError:
-                        ...
-                    else:
-                        # append file to `self.fetched_files`
-                        self.fetched_files.append(
-                            dupliFile(name=file_, root=root, size=size, secure_hash="")
-                        )
+            for file_path in self.scantree(self.path):
+                size = os.path.getsize(file_path)
+                if size == 0:
+                    continue
+                self.fetched_files.append(
+                    dupliFile(
+                        name=os.path.basename(file_path),
+                        root=os.path.split(file_path)[0], size=size, secure_hash='')
+                )
         else:
-            # fetch all files in `self.path` with `os.listdir`
+            # fetch all files in `self.path` with `os.scandir`
             for file_ in filterfalse(
-                # filter out dirs with `fiterfalse`
-                lambda x: not os.path.isfile(os.path.join(self.path, x)),
-                # directory listing with os.listdir
-                os.listdir(self.path),
+                    # filter out dirs
+                    lambda x: x.is_dir(follow_symlinks=False),
+                    # directory listing with os.listdir
+                    os.scandir(self.path),
             ):
-                # sometimes somehow some files are returned from fetch but raises FileNotFoundError whenever they are been used.
-                try:
-                    size = os.path.getsize(os.path.join(self.path, file_))
-                except FileNotFoundError:
-                    ...
-                else:
-                    self.fetched_files.append(
-                        dupliFile(name=file_, root=self.path, size=size, secure_hash="")
-                    )
+                # sometimes somehow files are returned from fetch but raises FileNotFoundError whenever they are
+                # being accessed.
+                size = os.path.getsize(file_.path)
+                self.fetched_files.append(
+                    dupliFile(name=file_.name, root=os.path.split(file_.path)[0], size=size, secure_hash="")
+                )
         # return `self.fetched_files`
         if not self.fetched_files:
             raise NoFilesFoundError(
@@ -264,44 +284,44 @@ class dupliCat:
             raise NoFilesFoundError("no files found, did you forget to fetch files?")
         # initialize index
         index: Dict[str, List[dupliFile]] = dict()
-        # insert data in index
+        with ThreadPoolExecutor(max_workers=10) as thread_pool:
+            thread_pool.map(self.set_secure_hash,
+                            files_)  # files are already in files_ no need to assign that to a variable
+        # populate the index
         for file_ in files_:
-            try:
-                # generate secure hash for each file
-                self.generate_secure_hash(file_)
-            except (PermissionError, TypeError):
-                pass  # do nothing...
+            # self.set_secure_hash(file_) # set the file hashes
             index.setdefault(file_.secure_hash, []).append(file_)
         # filter only sizes containing two or more files
         index = {key: value for key, value in index.items() if len(value) > 1}
         # set to `self.size_index`
         self.hash_index = index
 
-    def search_duplicate(self, use_hash=True, from_size=True) -> List[dupliFile]:
-        """search for duplicate files either `by_hash` or `by_size` or both."""
+    def search_duplicate(self) -> List[dupliFile]:
+        """search for duplicate files"""
         # get files
         files_ = self.fetched_files if self.fetched_files else self.fetch_files()
         # generate size index
         self.generate_size_index(files=files_)
-        # find duplicates by both methods
-        if use_hash:
-            if (
-                from_size and not self.size_index
-            ):  # from_size should be controlles by `search_duplicate`
-                # not `generate_hash_index`
-                raise NoDuplicatesFound("No duplicates found!")
-            # else use files from size index
-            files_ = [file_ for items in self.size_index.values() for file_ in items]
-            # enable hash generation from size index
-            self.generate_hash_index(files=files_)
-            # set all duplicated files from hash index
-            duplicate_files = [
-                file_ for items in self.hash_index.values() for file_ in items
-            ]
-        else:
-            duplicate_files = [
-                file_ for items in self.size_index.values() for file_ in items
-            ]
+        # enforcing the use of hash index by default, no longer optional
+        if (
+                not self.size_index
+        ):
+            raise NoDuplicatesFound("No duplicates found!")
+        # else use files from size index
+        files_ = [file_ for items in self.size_index.values() for file_ in items]
+        # enable hash generation from size index
+        self.generate_hash_index(files=files_)
+
+        # set junk files 
+        # I wish i could do 
+        # self.junk_files = duplicate_files - list(set(duplicate_files))
+        self.junk_files = [file_ for items in self.hash_index.values() for file_ in items[1:]]
+
+        # set all duplicated files from hash index
+        duplicate_files = [
+            file_ for items in self.hash_index.values() for file_ in items
+        ]
+
         # set and return a copy
         self.duplicates = duplicate_files
         return duplicate_files.copy()
