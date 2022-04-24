@@ -20,13 +20,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import dupliCat
-import click
 import os
 from collections import defaultdict
 
+import click
 
-__version__ = "3.2.7"
+import dupliCat
+from dupliCat import __version__
 
 
 @click.group()

@@ -30,6 +30,7 @@ from itertools import filterfalse
 from functools import wraps, cached_property
 from concurrent.futures import ThreadPoolExecutor
 
+__version__ = "3.2.7"
 
 class DupliCatException(Exception):
     """base exception class"""
@@ -334,4 +335,5 @@ __all__ = (
     "NoDuplicatesFound",
     "dupliCat",
     "Analysis",
+    "__version__",
 )

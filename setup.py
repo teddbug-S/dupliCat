@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-from .src.dupliCat.__main__ import __version__
+from src.dupliCat import __version__
 
 with open("README.md", "r", encoding="utf-8") as readme:
     long_description = readme.read()
