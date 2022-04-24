@@ -1,11 +1,13 @@
 from setuptools import setup, find_packages
 
+from .src.dupliCat.__main__ import __version__
+
 with open("README.md", "r", encoding="utf-8") as readme:
     long_description = readme.read()
 
 setup(
     name="dupliCat",
-    version="3.2.5",
+    version=__version__,
     author="Divine Darkey (teddbug-S)",
     author_email="teddbug47@gmail.com",
     maintainer="Divine Darkey (teddbug-S)",
