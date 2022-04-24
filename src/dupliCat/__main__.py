@@ -28,6 +28,7 @@ from collections import defaultdict
 
 __version__ = "3.2.5"
 
+
 @click.group()
 def main() -> bool:  # type: ignore
     pass
@@ -36,15 +37,14 @@ def main() -> bool:  # type: ignore
 @main.command(name="version")
 def version():
     """outputs the version number of the script"""
-    click.echo(f"dupliCat {__version__}")
+    click.echo(click.style(f"\ndupliCat {__version__}", fg="green", bold=True))
+
 
 @main.command(name="search-duplicates")
 @click.option("--no-recurse", is_flag=True, help="Do not recurse into subdirectories")
 @click.option("--path", default=os.getcwd(), help="Path to the directory to be scanned")
 @click.option("--delete", is_flag=True, help="Delete duplicate files.")
-def search_duplicates(
-    path: str, no_recurse: bool, dont_use_hash: bool, dont_use_size: bool, delete: bool
-) -> None:
+def search_duplicates(path: str, no_recurse: bool, delete: bool) -> None:
     click.echo(click.style(f"Scanning {path!r}...\n", fg="green", bold=True))
 
     duplicat = dupliCat.dupliCat(path=path, recurse=not no_recurse)
