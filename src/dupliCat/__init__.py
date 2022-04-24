@@ -153,7 +153,7 @@ class dupliCat:
     def scantree(self, path: AnyStr | os.PathLike[AnyStr]) -> Generator[AnyStr]:
         """scans a directory tree recursively yielding each every file in its full path"""
         try:
-            for new_path in filterfalse(lambda x: x.name.startswith('.'), os.scandir(path)):
+            for new_path in filterfalse(lambda x: x.name.startswith("."), os.scandir(path)):
                 if new_path.is_file():  # base case
                     yield new_path.path
                 else:
@@ -162,7 +162,7 @@ class dupliCat:
             ...
 
     @staticmethod
-    def read_chunk(file_: dupliFile, size: int = 400) -> bytes:
+    def read_chunk(file_: dupliFile, size: int = 400) -> Optional[bytes]:
         """Reads first `size` chunks from file, `size` defaults to 400."""
         try:
             with open(os.path.join(file_.root, file_.name), "rb") as f:
@@ -262,7 +262,7 @@ class dupliCat:
             )
         return self.fetched_files.copy()
 
-    def generate_size_index(self, files: Iterable = None) -> None:
+    def generate_size_index(self, files: Optional[Iterable] = None) -> None:
         """generates index of files grouped together by sizes"""
         index: Dict[int, List[dupliFile]] = dict()
         files = files if files else self.fetched_files
@@ -274,7 +274,7 @@ class dupliCat:
         # set to `self.size_index`
         self.size_index = index
 
-    def generate_hash_index(self, files: Iterable = None) -> None:
+    def generate_hash_index(self, files: Optional[Iterable] = None) -> None:
         """generates index of files grouped together by secure_hashes of the files
         Args:
             files: files to use in generating the index"""

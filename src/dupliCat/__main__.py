@@ -27,15 +27,13 @@ from collections import defaultdict
 
 
 @click.group()
-def main() -> bool:
+def main() -> bool:  # type: ignore
     pass
 
 
 @main.command(name="search-duplicates")
 @click.option("--no-recurse", is_flag=True, help="Do not recurse into subdirectories")
 @click.option("--path", default=os.getcwd(), help="Path to the directory to be scanned")
-@click.option("--dont-use-hash", is_flag=True, help="Do not use hash to compare files")
-@click.option("--dont-use-size", is_flag=True, help="Do not use size to compare files")
 @click.option("--delete", is_flag=True, help="Delete duplicate files.")
 def search_duplicates(
     path: str, no_recurse: bool, dont_use_hash: bool, dont_use_size: bool, delete: bool
@@ -44,9 +42,7 @@ def search_duplicates(
 
     duplicat = dupliCat.dupliCat(path=path, recurse=not no_recurse)
     try:
-        duplicates = duplicat.search_duplicate(
-            use_hash=not dont_use_hash, from_size=not dont_use_size
-        )
+        duplicates = duplicat.search_duplicate()
     except dupliCat.NoDuplicatesFound:
         click.echo(click.style("No duplicates found.", fg="green", bold=True))
         return None
@@ -112,7 +108,8 @@ def search_duplicates(
         click.echo(
             click.style(
                 f"\nDeleted {counter} {'file' if counter == 1 else 'files'} out of {len(files)}",
-                bold=True, fg=color
+                bold=True,
+                fg=color,
             )
         )
 
