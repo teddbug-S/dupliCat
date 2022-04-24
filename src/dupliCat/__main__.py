@@ -76,6 +76,10 @@ def search_duplicates(path: str, no_recurse: bool, delete: bool) -> None:
             bold=True,
         )
         click.echo(q)
+    
+    # print out total size of duplicates
+    total_size = sum(f.size for f in duplicates)
+    click.echo(click.style(f"\nTotal size: {duplicat.human_size(total_size)}", fg="green", bold=True))
 
     if delete and length > 0:
         # asking for confirmation on whether to delete files
