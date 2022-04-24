@@ -26,10 +26,17 @@ import os
 from collections import defaultdict
 
 
+__version__ = "3.2.5"
+
 @click.group()
 def main() -> bool:  # type: ignore
     pass
 
+
+@main.command(name="version")
+def version():
+    """outputs the version number of the script"""
+    click.echo(f"dupliCat {__version__}")
 
 @main.command(name="search-duplicates")
 @click.option("--no-recurse", is_flag=True, help="Do not recurse into subdirectories")
